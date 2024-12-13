@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  username  String    @unique
+  balance   Decimal  @default(10000)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+
+  @@index([email])
+  Session Session[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Decimal
+  denomination Decimal
+  imageUrl    String
+  description String?
+  stocks      Stock[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("products")
+}
+
+model Stock {
+  id         Int        @id @default(autoincrement())
+  code       String     @unique
+  status     StockStatus
+  productId  Int
+  product    Product    @relation(fields: [productId], references: [id])
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@map("stocks")
+}
+
+model Order {
+  id         Int          @id @default(autoincrement())
+  customerId Int
+  status     OrderStatus @default(PROCESSING)
+  total      Float
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  customer   Customer    @relation(fields: [customerId], references: [id])
+  items      OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  price     Float
+  code      String
+  order     Order    @relation(fields: [orderId], references: [id])
+
+  @@map("order_items")
+}
+
+model Session {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  active    Boolean   @default(true)
+  endedAt   DateTime?
+  createdAt DateTime  @default(now())
+  user      Customer      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+}
+
+enum OrderStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum StockStatus {
+  IN_STOCK
+  RESERVED
+  SOLD
+}
