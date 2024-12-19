@@ -23,6 +23,7 @@ import {
 } from '@nestjs/swagger';
 @ApiTags('orders')
 @Controller('api/orders')
+@UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth() // เ
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
@@ -40,6 +41,7 @@ export class OrdersController {
   }
 
   @Get(':orderId')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get order by ID' })
   @ApiParam({ name: 'orderId', type: 'number' })
   @ApiResponse({
@@ -55,6 +57,7 @@ export class OrdersController {
   }
 
   @Get('codes/:orderId')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get redemption codes for an order' })
   @ApiParam({ name: 'orderId', type: 'number' })
   @ApiResponse({
@@ -69,6 +72,7 @@ export class OrdersController {
   }
 
   @Get('customer/:customerId')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get orders by customer ID' })
   @ApiParam({ name: 'customerId', type: 'number' })
   @ApiResponse({

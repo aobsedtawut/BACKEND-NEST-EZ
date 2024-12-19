@@ -1,15 +1,23 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { PaginationQueryDto } from 'src/core/dtos/pagination-query.dto';
 import { ProductsService } from '../services/product.service';
 import { CreateProductDto } from 'src/core/dtos/create-product.dto';
-
+import { AuthGuard } from '@nestjs/passport';
 @ApiTags('Products')
 @Controller('products')
+@UseGuards(AuthGuard('jwt'))
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all products with pagination' })
   @ApiResponse({
     status: 200,
@@ -23,6 +31,7 @@ export class ProductsController {
   }
 
   @Post()
+  @ApiBearerAuth()
   async create(@Body() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
   }
